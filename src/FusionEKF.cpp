@@ -1,7 +1,9 @@
+
+#include <iostream>
+#include "Eigen/Dense"
+
 #include "FusionEKF.h"
 #include "tools.h"
-#include "Eigen/Dense"
-#include <iostream>
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -24,10 +26,12 @@ FusionEKF::FusionEKF()
     R_radar_ = MatrixXd(3, 3);
     H_laser_ = MatrixXd(2, 4);
     H_radar_ = MatrixXd(3, 4);  // to be filled
+//    cout << "FusionEKF" <<endl;
 
     //measurement covariance matrix - laser
     R_laser_ << 0.0225, 0,
              0, 0.0225;
+
 
     //measurement covariance matrix - radar
     R_radar_ << 0.09, 0, 0,
@@ -41,17 +45,20 @@ FusionEKF::FusionEKF()
     */
     H_laser_ << 1,0,0,0,
              0,1,0,0;
+//              cout << "H_laser_" <<endl;
     // state transition matrix
     ekf_.F_ = MatrixXd(4, 4);  // to be filled
+//     cout << "ekf_.F_ " <<endl;
     // State covariance matrix P
     ekf_.P_ = MatrixXd(4, 4);
-    ekf_.P_ << 1,0,0,0;
-               0,1,0,0;
+//     cout << "ekf_.P_ " <<endl;
+    ekf_.P_ << 1,0,0,0,
+               0,1,0,0,
                0,0,1000,0,
                0,0,0,1000;
     // Process covariance matrix
     ekf_.Q_ = MatrixXd(4, 4);  // to be filled
-
+//cout << "ekf_.Q_ " <<endl;
     noise_ax = 9.0;
     noise_ay = 9.0;
 
@@ -67,6 +74,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
 {
 
 
+
     /*****************************************************************************
      *  Initialization
      ****************************************************************************/
@@ -79,7 +87,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
           * Remember: you'll need to convert radar from polar to cartesian coordinates.
         */
         // first measurement
-        cout << "EKF: " << endl;
+//        cout << "EKF: " << endl;
         ekf_.x_ = VectorXd(4);
         ekf_.x_ << 1, 1, 1, 1;
 
@@ -140,16 +148,16 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
     float dt_3 = dt_2 * dt;
     float dt_4 = dt_3 * dt;
     // state transition matrix
-    // ekf_.F_ = MatrixXd(4, 4);
+     ekf_.F_ = MatrixXd(4, 4);
     ekf_.F_ << 1, 0, dt, 0,
-		  0, 1, 0, dt,
-		  0, 0, 1, 0,
+          0, 1, 0, dt,
+          0, 0, 1, 0,
           0, 0, 0, 1;
     // process covariance
-//    ekf_.Q_ = MatrixXd(4, 4);
+    ekf_.Q_ = MatrixXd(4, 4);
     ekf_.Q_ <<  dt_4/4*noise_ax, 0, dt_3/2*noise_ax, 0,
-			   0, dt_4/4*noise_ay, 0, dt_3/2*noise_ay,
-			   dt_3/2*noise_ax, 0, dt_2*noise_ax, 0,
+               0, dt_4/4*noise_ay, 0, dt_3/2*noise_ay,
+               dt_3/2*noise_ax, 0, dt_2*noise_ax, 0,
                0, dt_3/2*noise_ay, 0, dt_2*noise_ay;
 
     ekf_.Predict();

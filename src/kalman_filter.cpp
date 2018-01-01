@@ -11,6 +11,7 @@ KalmanFilter::~KalmanFilter() {}
 
 void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
                         MatrixXd &H_in, MatrixXd &R_in, MatrixXd &Q_in) {
+//  cout << "KalmanFilter: Init" <<endl;
   x_ = x_in;
   P_ = P_in;
   F_ = F_in;
@@ -24,6 +25,7 @@ void KalmanFilter::Predict() {
   TODO:
     * predict the state
   */
+//  cout << "KalmanFilter: Predict" <<endl;
   x_ = F_ * x_;
   P_ = F_ * P_ * F_.transpose() + Q_;
 
@@ -34,6 +36,7 @@ void KalmanFilter::Update(const VectorXd &z) {
   TODO:
     * update the state by using Kalman Filter equations
   */
+//  cout << "KalmanFilter: Update" <<endl;
   	VectorXd z_pred = H_ * x_;
 	VectorXd y = z - z_pred;
 	updateState(y);
@@ -45,18 +48,19 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
+//  cout << "KalmanFilter: UpdateEKF" <<endl;
   VectorXd z_pred = ComputeRadarFromState();
   VectorXd y = z - z_pred;  // rho, phi, drho
   float pi =  3.14159265359;
   float pi2 = 6.28318530718;
   while (y(1) > pi )
   {
-      cout << " phi > pi "  << endl;
+//      cout << " phi > pi "  << endl;
       y(1) = y(1) - pi2;
   }
-  while (y(2)< -pi)
+  while (y(1)< -pi)
   {
-      cout << " phi < -pi" << endl;
+//      cout << " phi < -pi" << endl;
       y(1) = y(1) + pi2;
   }
 
@@ -66,6 +70,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
 VectorXd KalmanFilter::ComputeRadarFromState()
 {
+//    cout << "KalmanFilter: ComputeRadarFromState" <<endl;
     float px = x_[0];
     float py = x_[1];
     float vx = x_[2];
@@ -96,6 +101,7 @@ VectorXd KalmanFilter::ComputeRadarFromState()
 void KalmanFilter::updateState(const VectorXd &y)
 {
 
+//cout << "KalmanFilter: updateState" <<endl;
     MatrixXd Ht = H_.transpose();
 	MatrixXd S = H_ * P_ * Ht + R_;
 	MatrixXd Si = S.inverse();
